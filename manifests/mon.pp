@@ -46,7 +46,7 @@ define ceph::mon (
 
   #FIXME: monitor_secret will appear in "ps" output …
   exec { 'ceph-mon-keyring':
-    command => "ceph-authtool /var/lib/ceph/tmp/keyring.mon.${name} \
+    command => "/usr/bin/ceph-authtool /var/lib/ceph/tmp/keyring.mon.${name} \
 --create-keyring \
 --name=mon. \
 --add-key='${monitor_secret}' \
@@ -57,7 +57,7 @@ define ceph::mon (
   }
 
   exec { 'ceph-mon-mkfs':
-    command => "ceph-mon --mkfs -i ${name} \
+    command => "/usr/bin/ceph-mon --mkfs -i ${name} \
 --keyring /var/lib/ceph/tmp/keyring.mon.${name}",
     creates => "${mon_data_real}/keyring",
     require => [
@@ -85,19 +85,19 @@ define ceph::mon (
   }
 
   exec { 'ceph-admin-key':
-    command => "ceph-authtool /etc/ceph/keyring \
+    command => "/usr/bin/ceph-authtool /etc/ceph/ceph.client.admin.keyring \
 --create-keyring \
 --name=client.admin \
 --add-key \
-$(ceph --name mon. --keyring ${mon_data_real}/keyring \
+$(/usr/bin/ceph --name mon. --keyring ${mon_data_real}/keyring \
   auth get-or-create-key client.admin \
     mon 'allow *' \
     osd 'allow *' \
     mds allow)",
-    creates => '/etc/ceph/keyring',
+    creates => '/etc/ceph/ceph.client.admin.keyring',
     require => Package['ceph'],
-    onlyif  => "ceph --admin-daemon /var/run/ceph/ceph-mon.${name}.asok \
-mon_status|egrep -v '\"state\": \"(leader|peon)\"'",
+    onlyif  => "/usr/bin/ceph --admin-daemon /var/run/ceph/ceph-mon.${name}.asok \
+mon_status|/bin/egrep -v '\"state\": \"(leader|peon)\"'",
   }
 
 }
