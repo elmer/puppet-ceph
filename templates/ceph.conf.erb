@@ -16,7 +16,6 @@
 <% if @signatures_sign_msgs -%>
   cephx sign messages = <%= @signatures_sign_msgs %>
 <% end -%>
-  keyring = /etc/ceph/keyring
 <% if @cluster_network && @public_network -%>
   cluster network = <%= @cluster_network %>
   public network = <%= @public_network %>
