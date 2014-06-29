@@ -8,7 +8,7 @@ describe 'ceph::key' do
 
   describe 'with default parameters' do
     it { should contain_exec('ceph-key-dummy').with(
-      'command' => "ceph-authtool /var/lib/ceph/tmp/dummy.keyring --create-keyring --name='client.dummy' --add-key=''",
+      'command' => "/usr/bin/ceph-authtool /var/lib/ceph/tmp/dummy.keyring --create-keyring --name='client.dummy' --add-key=''",
       'creates' => '/var/lib/ceph/tmp/dummy.keyring',
       'require' => 'Package[ceph]'
     )}
@@ -19,7 +19,7 @@ describe 'ceph::key' do
       { :secret => 'shhh_dont_tell_anyone' }
     end
     it { should contain_exec('ceph-key-dummy').with(
-      'command' => "ceph-authtool /var/lib/ceph/tmp/dummy.keyring --create-keyring --name='client.dummy' --add-key='shhh_dont_tell_anyone'",
+      'command' => "/usr/bin/ceph-authtool /var/lib/ceph/tmp/dummy.keyring --create-keyring --name='client.dummy' --add-key='shhh_dont_tell_anyone'",
       'creates' => '/var/lib/ceph/tmp/dummy.keyring',
       'require' => 'Package[ceph]'
     )}
@@ -30,7 +30,7 @@ describe 'ceph::key' do
       { :keyring_path => '/dummy/path/for/keyring' }
     end
     it { should contain_exec('ceph-key-dummy').with(
-      'command' => "ceph-authtool /dummy/path/for/keyring --create-keyring --name='client.dummy' --add-key=''",
+      'command' => "/usr/bin/ceph-authtool /dummy/path/for/keyring --create-keyring --name='client.dummy' --add-key=''",
       'creates' => '/dummy/path/for/keyring',
       'require' => 'Package[ceph]'
     )}

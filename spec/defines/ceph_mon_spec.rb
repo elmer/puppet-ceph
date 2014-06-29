@@ -35,7 +35,7 @@ class { "ceph::conf": fsid => "1234567890" }
     it { should contain_ceph__conf__mon('42').with_mon_addr('169.254.0.1') }
 
     it { should contain_exec('ceph-mon-keyring').with(
-      'command' => "ceph-authtool /var/lib/ceph/tmp/keyring.mon.42 \
+      'command' => "/usr/bin/ceph-authtool /var/lib/ceph/tmp/keyring.mon.42 \
 --create-keyring --name=mon. --add-key='hardtoguess' \
 --cap mon 'allow *'",
       'creates' => '/var/lib/ceph/tmp/keyring.mon.42',
@@ -44,7 +44,7 @@ class { "ceph::conf": fsid => "1234567890" }
     )}
 
     it { should contain_exec('ceph-mon-mkfs').with(
-      'command' => "ceph-mon --mkfs -i 42 --keyring /var/lib/ceph/tmp/keyring.mon.42",
+      'command' => "/usr/bin/ceph-mon --mkfs -i 42 --keyring /var/lib/ceph/tmp/keyring.mon.42",
       'creates' => '/var/lib/ceph/mon/mon.42/keyring',
       'require' => ['Package[ceph]','Concat[/etc/ceph/ceph.conf]',
         'File[/var/lib/ceph/mon/mon.42]']
@@ -66,17 +66,17 @@ class { "ceph::conf": fsid => "1234567890" }
     )}
 
     it { should contain_exec('ceph-admin-key').with(
-      'command' => "ceph-authtool /etc/ceph/keyring \
+      'command' => "/usr/bin/ceph-authtool /etc/ceph/ceph.client.admin.keyring \
 --create-keyring --name=client.admin --add-key \
-$(ceph --name mon. --keyring /var/lib/ceph/mon/mon.42/keyring \
+$(/usr/bin/ceph --name mon. --keyring /var/lib/ceph/mon/mon.42/keyring \
   auth get-or-create-key client.admin \
     mon 'allow *' \
     osd 'allow *' \
     mds allow)",
-      'creates' => '/etc/ceph/keyring',
+      'creates' => '/etc/ceph/ceph.client.admin.keyring',
       'require' => 'Package[ceph]',
-      'onlyif'  => "ceph --admin-daemon /var/run/ceph/ceph-mon.42.asok \
-mon_status|egrep -v '\"state\": \"(leader|peon)\"'"
+      'onlyif'  => "/usr/bin/ceph --admin-daemon /var/run/ceph/ceph-mon.42.asok \
+mon_status|/bin/egrep -v '\"state\": \"(leader|peon)\"'"
     )}
   end
 

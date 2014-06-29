@@ -31,20 +31,20 @@ class { 'ceph::osd':
     it { should contain_class('ceph::conf') }
 
     it { should contain_exec('mktable_gpt_device').with(
-      'command' => 'parted -a optimal --script /dev/device mktable gpt',
-      'unless'  => "parted --script /dev/device print|grep -sq 'Partition Table: gpt'",
+      'command' => '/sbin/parted -a optimal --script /dev/device mktable gpt',
+      'unless'  => "/sbin/parted --script /dev/device print|/bin/grep -sq 'Partition Table: gpt'",
       'require' => 'Package[parted]'
     ) }
 
     it { should contain_exec('mkpart_device').with(
-      'command' => 'parted -a optimal -s /dev/device mkpart ceph 0% 100%',
-      'unless'  => "parted /dev/device print | egrep '^ 1.*ceph$'",
+      'command' => '/sbin/parted -a optimal -s /dev/device mkpart ceph 0% 100%',
+      'unless'  => "/sbin/parted /dev/device print | /bin/egrep '^ 1.*ceph$'",
       'require' => ['Package[parted]', 'Exec[mktable_gpt_device]']
     ) }
 
     it { should contain_exec('mkfs_device').with(
-      'command' => 'mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device1',
-      'unless'  => 'xfs_admin -l /dev/device1',
+      'command' => '/sbin/mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device1',
+      'unless'  => '/usr/sbin/xfs_admin -l /dev/device1',
       'require' => ['Package[xfsprogs]', 'Exec[mkpart_device]']
     ) }
 
@@ -72,8 +72,8 @@ ceph::key { 'admin':
     end
 
     it { should contain_exec('ceph_osd_create_device').with(
-      'command' => 'ceph osd create dummy-uuid-1234',
-      'unless'  => 'ceph osd dump | grep -sq dummy-uuid-1234',
+      'command' => '/usr/bin/ceph osd create dummy-uuid-1234',
+      'unless'  => '/usr/bin/ceph osd dump | /bin/grep -sq dummy-uuid-1234',
       'require' => 'Ceph::Key[admin]'
     ) }
 
@@ -110,14 +110,14 @@ ceph::key { 'admin':
       ) }
 
       it { should contain_exec('ceph-osd-mkfs-56').with(
-        'command' => 'ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
+        'command' => '/usr/bin/ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
 ',
         'creates' => '/var/lib/ceph/osd/ceph-56/keyring',
         'require' => ['Mount[/var/lib/ceph/osd/ceph-56]', 'Concat[/etc/ceph/ceph.conf]']
       ) }
 
       it { should contain_exec('ceph-osd-register-56').with(
-        'command' => "ceph auth add osd.56 osd 'allow *' mon 'allow rwx' -i /var/lib/ceph/osd/ceph-56/keyring",
+        'command' => "/usr/bin/ceph auth add osd.56 osd 'allow *' mon 'allow rwx' -i /var/lib/ceph/osd/ceph-56/keyring",
         'require' => 'Exec[ceph-osd-mkfs-56]'
       ) }
 
